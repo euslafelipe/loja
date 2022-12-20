@@ -1,64 +1,71 @@
-var api = "http://localhost:8080/api/produto/";
-var lista;
-
+// request via JavaScript ajax 4 passos
+// 01 criar a váriavel
 xhttp = new XMLHttpRequest();
+var lista;
+var api = "http://localhost:8080/api/produto/";
 
 function listar() {
+    // 02 definição do nosso request (forma e endereço)
     xhttp.open("GET", api);
+    // 03 manda de fato a request
     xhttp.send();
+    // 04 execução quando tiver a devolutiva do request
     xhttp.onload = function () {
         lista = this.responseText;
+        // console.log(lista);
         lista = JSON.parse(lista);
-        corpoTabela = "";
-        for (i in lista) {
-            produto = lista[i];
-            corpoTabela += `
-                    <tr onclick='editar(${i})'>
-                    <td>${produto.nome}</td>
-                    <td>${produto.descricao}</td>
-                    <td>${produto.valor}</td>
-                    </tr>`;
+        // console.log(lista);
+        texto = "";
+        i = 0;
+        for (const u of lista) {
+            texto += `<tr onclick='editar(${i})'><td>${u.nome}</td><td>R$ ${u.valor.toFixed(2)}</td></tr>`;
+            i++;
         }
-        document.querySelector("#corpoTabela").innerHTML = corpoTabela;
+        document.getElementById('lista').innerHTML = texto;
     }
 }
 
-listar();
-
 function editar(i) {
-    produto = lista[i];
-    document.querySelector("#nome").value = produto.nome;
-    document.querySelector("#descricao").value = produto.descricao;
-    document.querySelector("#valor").value = produto.valor;
-    document.querySelector("#id").value = produto.id;
+    u = lista[i];
+    document.getElementById("nome").value = u.nome;
+    document.getElementById("descricao").value = u.descricao;
+    document.getElementById("valor").value = u.valor;
+    document.getElementById("img").value = u.img;
+    document.getElementById("id").value = u.id;
 }
 
 function gravar() {
-    produto = {};
-    produto.nome = document.getElementById("nome").value;
-    produto.descricao = document.getElementById("descricao").value;
-    produto.valor = document.getElementById("valor").value;
+    //alert("Estamos dentro da function incluir");
+    var item = {};
+    item.nome = document.getElementById("nome").value;
+    item.descricao = document.getElementById("descricao").value;
+    item.valor = document.getElementById("valor").value;
+    item.img = document.getElementById("img").value;
+    // console.log(item);
 
-    produto.id = document.getElementById("id").value;
-
-    acao = (produto.id > 0) ? "PUT" : "POST";
+    item.id = document.getElementById("id").value;
+    if (item.id > 0) {
+        acao = "PUT"; // alteração
+    } else {
+        acao = "POST"; // incluir
+    }
 
     xhttp.open(acao, api);
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.send(JSON.stringify(produto));
+    xhttp.send(JSON.stringify(item));
     xhttp.onload = function () {
-        // this.responseText;
+        // console.log(this.responseText);
         listar();
         limpar();
     }
-
 }
 
 function limpar() {
-    document.querySelector("#nome").value = "";
-    document.querySelector("#descricao").value = "";
-    document.querySelector("#valor").value = "";
-    document.querySelector("#id").value = "";
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("valor").value = "";
+    document.getElementById("img").value = "";
+    document.getElementById("id").value = "";
 }
 
 function apagar() {
@@ -66,9 +73,9 @@ function apagar() {
     xhttp.open("DELETE", api + id);
     xhttp.send();
     xhttp.onload = function () {
-        msg = this.responseText;
-        alert(msg);
+        alert(this.responseText);
         listar();
         limpar();
     }
 }
+listar();
